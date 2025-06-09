@@ -9,11 +9,17 @@ We thank [Christopher R. Anderson](http://www.math.ucla.edu/~anderson) for writi
 # Usage
 
 To run the code, one must first modify `main.cpp` by specifying:
+
 `numGroups`: the number of groups in the initial group assignment
+
 `numNodes`: the number of nodes in the network
+
 `layersA`: the number of layers in the network
+
 `dataset`: the start of the filenames for the imported network structure and for the outputted group structure
+
 `mnMoveProb`: the probability that a multi-node move is proposed
+
 `numMCSteps`: the number of Monte Carlo steps to perform
 
 Additionally, for each layer of a network, one needs to add text files with filename `[dataset]layer[layer].txt` (where [dataset] was chosen previously and [layer] is the index of the given layer; for example, if `dataset ` was chosen to be `luke` and we are considering layer 3, the filename should be `lukelayer3.txt`) each of which contains the adjacency matrix for a given layer of the network. These text files should be such that each entry in a row of the adjacency matrix is seperated by a single space and such that each row is seperated by a newline. For example:
