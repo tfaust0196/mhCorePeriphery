@@ -1,6 +1,6 @@
 # Inference of Hierarchical Core—Periphery Structure in Temporal Networks
 
-This code implements our Markov chain Monte Carlo approach for the identification of hierarchical core—periphery structure in temporal networks, as described in this paper.
+This code implements our Markov chain Monte Carlo approach for the identification of hierarchical core—periphery structure in temporal networks, as described in this [paper](https://arxiv.org/abs/2506.10135).
 
 # Acknowledgements
 
