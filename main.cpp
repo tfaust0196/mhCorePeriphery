@@ -20,8 +20,8 @@
 using namespace std::chrono;
 using namespace std::complex_literals;
 #ifdef _MSC_VER
-#include "iso646.h"      // So "and" is equivalenced to &&
-typedef unsigned int uint;   // Define uint to be unsigned int
+#include "iso646.h"      
+typedef unsigned int uint;   
 #endif
 long double logprobratio(MathMatrix A, std::vector<MathMatrix> G, int node, int group, int layer);
 long double logbinom(double n, double k);
@@ -33,18 +33,16 @@ long double lognewcorrectionNovel(MathMatrix G, int node, int layer, int numGrou
 bool stepNoGpSizeBiasNew(std::vector<MathMatrix> A, std::vector<MathMatrix> G, int node, int group, int layer, int numGroups, std::vector<std::vector<double>> corrections);
 long double logprobrationew(std::vector<MathMatrix> A, std::vector<MathMatrix> G, std::vector<MathMatrix> Gtemp, std::vector<std::vector<double>> corrections);
 double logfactorial2(double n);
-int main(int argc, const char * argv[]) // generates a test network and runs the MCMC method on it
-
+int main(int argc, const char * argv[]) 
 {
-    // used to generate uniform random numbers in [0,1]
     std::random_device rd3;
     std::mt19937 gen3(rd3());
     std::uniform_real_distribution<> dis3(0.0, 1.0);
-    int numGroups = 4; //number of groups
+    int numGroups = 4; 
     size_t numNodes = 76;
     std::vector<std::vector<double>> corrs = corrections(numNodes);
     size_t sizeA = numNodes;
-    size_t layersA = 5; // number of layers
+    size_t layersA = 5; 
     size_t numLayers = layersA;
     int runs = 1;
     std::string dataset = "luke";
@@ -54,17 +52,13 @@ int main(int argc, const char * argv[]) // generates a test network and runs the
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> distrib(0,numLayers-1);
-    // used to generate random group
     std::random_device rd4;
     std::mt19937 gen4(rd4());
     std::uniform_int_distribution<> distrib4(0,numNodes-1);
-    long numMCSteps = 1e6; // number of Monte Carlo steps for Markov chain Monte Carlo process
-    bool runSingleLayer = false; // flag for whether or not to compute single-layer core-periphery structure for A[0] using Newman et al approach
+    long numMCSteps = 1e6; 
+    bool runSingleLayer = false; 
     bool noGpSizeBias = true;
     bool degreeCorrection = true;
-    //std::vector<MathMatrix> Gcount(std::pow(2,numGroups-1),MathMatrix(numNodes,numLayers));
-    
-    
     std::vector<MathMatrix> A(layersA,MathMatrix(sizeA,sizeA));
     for (size_t l = 0; l < layersA; ++l)
     {
@@ -85,8 +79,8 @@ int main(int argc, const char * argv[]) // generates a test network and runs the
     std::vector<MathMatrix> groupAssignsFinal(numLayers,MathMatrix(numNodes,runs));
     for (size_t run = 0; run < runs; ++run)
     {
-        std::vector<MathMatrix> G(numGroups,MathMatrix(numNodes,numLayers)); // list of matrices of indicator variables: G[r](i,l) = g^r_{(i,l)}
-        G[0] = MathMatrix(numNodes,numLayers,1.0); // every node-layer is always an element of group 0
+        std::vector<MathMatrix> G(numGroups,MathMatrix(numNodes,numLayers)); 
+        G[0] = MathMatrix(numNodes,numLayers,1.0); 
         for (size_t g = 1; g < numGroups; ++g)
         {
             for (size_t k = 0; k < numNodes; ++k)
@@ -123,9 +117,8 @@ int main(int argc, const char * argv[]) // generates a test network and runs the
                 for (size_t perturbStep = 0; perturbStep < numPerturbSteps; ++perturbStep)
                 {
                     std::uniform_int_distribution<> distrib2(1,std::max(numGroups,2)-1);
-                    int layer = distrib(gen); // generate random layer
-                    int group = distrib2(gen2); // generate random group
-                    
+                    int layer = distrib(gen); 
+                    int group = distrib2(gen2); 
                     if (layer == 0)
                     {
                         double randomNum2 = dis3(gen3);
@@ -141,12 +134,10 @@ int main(int argc, const char * argv[]) // generates a test network and runs the
                         {
                             if (numGroups > 1.5)
                             {
-                                double randomNum = dis3(gen3); //generate uniform random number in [0,1]
-                                if (randomNum > 0.5) //remove node from group with prob 0.5
+                                double randomNum = dis3(gen3); 
+                                if (randomNum > 0.5) 
                                 {
-                                    std::vector<int> nodesInGroup; // vector to hold indices of node-layers for the selected layer which are in the selected group
-                                    
-                                    // loop over nodes in selected layer and check which are in the selected group
+                                    std::vector<int> nodesInGroup; 
                                     for (size_t n = 0; n < numNodes; ++n)
                                     {
                                         if (G[group](n,layer) > 0.9)
@@ -154,16 +145,14 @@ int main(int argc, const char * argv[]) // generates a test network and runs the
                                             nodesInGroup.push_back(n);
                                         }
                                     }
-                                    if (nodesInGroup.size() > 0) // can only rmove a node if there is a node in the group
+                                    if (nodesInGroup.size() > 0) 
                                     {
-                                        // choose node uniformly at random
                                         std::random_device rd5;
                                         std::mt19937 gen5(rd5());
                                         std::uniform_int_distribution<> distrib5(0,nodesInGroup.size()-1);
                                         int randIndex = distrib5(gen5);
                                         int node = nodesInGroup[randIndex];
-                                        // determine whether or not to accept move
-                                        G[group](node,layer) = -1.0*(G[group](node,layer)-1.0); // if accepted, "flip" indicator variable of selected node-layer for given group
+                                        G[group](node,layer) = -1.0*(G[group](node,layer)-1.0); 
                                     }
                                     else
                                     {
@@ -171,7 +160,7 @@ int main(int argc, const char * argv[]) // generates a test network and runs the
                                         G.erase(G.begin() + group);
                                     }
                                 }
-                                else //adding node (essentially the same as the above)
+                                else 
                                 {
                                     std::vector<int> nodesNotInGroup;
                                     for (size_t n = 0; n < numNodes; ++n)
@@ -194,11 +183,11 @@ int main(int argc, const char * argv[]) // generates a test network and runs the
                             }
                         }
                     }
-                    else // if the random layer is beyond the first
+                    else 
                     {
                         if (numGroups > 1.5)
                         {
-                            int node = distrib4(gen4); // choose node uniformly at random (from all possible nodes)
+                            int node = distrib4(gen4); 
                             G[group](node,layer) = -1.0*(G[group](node,layer)-1.0);
                         }
                     }
@@ -216,7 +205,6 @@ int main(int argc, const char * argv[]) // generates a test network and runs the
                                         groupNum += std::pow(2,g-1);
                                     }
                                 }
-                                //Gcount[groupNum](n,l) = Gcount[groupNum](n,l) + 1;
                                 intGroupAssignML[l](n,i/10000) = groupNum;
                             }
                         }
@@ -235,7 +223,6 @@ int main(int argc, const char * argv[]) // generates a test network and runs the
                                         groupNum += std::pow(2,g-1);
                                     }
                                 }
-                                //Gcount[groupNum](n,l) = Gcount[groupNum](n,l) + 1;
                             }
                         }
                     }
@@ -244,8 +231,8 @@ int main(int argc, const char * argv[]) // generates a test network and runs the
             else
             {
                 std::uniform_int_distribution<> distrib2(1,std::max(numGroups,2)-1);
-                int layer = distrib(gen); // generate random layer
-                int group = distrib2(gen2); // generate random group
+                int layer = distrib(gen); 
+                int group = distrib2(gen2); 
                 if (dis3(gen3) < mnMoveProb)
                 {
                     std::random_device rdev;
@@ -260,8 +247,6 @@ int main(int argc, const char * argv[]) // generates a test network and runs the
                     }
                     std::vector<MathMatrix> Gtemp = G;
                     size_t lay = layer;
-                    //for (size_t lay = layer; lay < numLayers; ++lay)
-                    //{
                         for (size_t y = 0; y < numNodes; ++y)
                         {
                             double temp1 = 0;
@@ -286,7 +271,6 @@ int main(int argc, const char * argv[]) // generates a test network and runs the
                                 }
                             }
                         }
-                    //}
                     long double logAcceptanceProb = logprobrationew(A, G, Gtemp, corrs);
                     if (dis3(gen3) < std::exp(logAcceptanceProb))
                     {
@@ -315,12 +299,10 @@ int main(int argc, const char * argv[]) // generates a test network and runs the
                         {
                             if (numGroups > 1.5)
                             {
-                                double randomNum = dis3(gen3); //generate uniform random number in [0,1]
-                                if (randomNum > 0.5) //remove node from group with prob 0.5
+                                double randomNum = dis3(gen3); 
+                                if (randomNum > 0.5) 
                                 {
-                                    std::vector<int> nodesInGroup; // vector to hold indices of node-layers for the selected layer which are in the selected group
-                                    
-                                    // loop over nodes in selected layer and check which are in the selected group
+                                    std::vector<int> nodesInGroup; 
                                     for (size_t n = 0; n < numNodes; ++n)
                                     {
                                         if (G[group](n,layer) > 0.9)
@@ -328,18 +310,16 @@ int main(int argc, const char * argv[]) // generates a test network and runs the
                                             nodesInGroup.push_back(n);
                                         }
                                     }
-                                    if (nodesInGroup.size() > 0) // can only rmove a node if there is a node in the group
+                                    if (nodesInGroup.size() > 0) 
                                     {
-                                        // choose node uniformly at random
                                         std::random_device rd5;
                                         std::mt19937 gen5(rd5());
                                         std::uniform_int_distribution<> distrib5(0,nodesInGroup.size()-1);
                                         int randIndex = distrib5(gen5);
                                         int node = nodesInGroup[randIndex];
-                                        // determine whether or not to accept move
                                         if (stepNoGpSizeBiasNew(A,G,node,group,layer,numGroups,corrs))
                                         {
-                                            G[group](node,layer) = -1.0*(G[group](node,layer)-1.0); // if accepted, "flip" indicator variable of selected node-layer for given group
+                                            G[group](node,layer) = -1.0*(G[group](node,layer)-1.0); 
                                         }
                                     }
                                     else
@@ -373,7 +353,7 @@ int main(int argc, const char * argv[]) // generates a test network and runs the
                                         }
                                     }
                                 }
-                                else //adding node (essentially the same as the above)
+                                else 
                                 {
                                     std::vector<int> nodesNotInGroup;
                                     for (size_t n = 0; n < numNodes; ++n)
@@ -399,11 +379,11 @@ int main(int argc, const char * argv[]) // generates a test network and runs the
                             }
                         }
                     }
-                    else // if the random layer is beyond the first
+                    else 
                     {
                         if (numGroups > 1.5)
                         {
-                            int node = distrib4(gen4); // choose node uniformly at random (from all possible nodes)
+                            int node = distrib4(gen4); 
                             if (stepNoGpSizeBiasNew(A,G,node,group,layer,numGroups,corrs))
                             {
                                 G[group](node,layer) = -1.0*(G[group](node,layer)-1.0);
@@ -424,7 +404,6 @@ int main(int argc, const char * argv[]) // generates a test network and runs the
                                         groupNum += std::pow(2,g-1);
                                     }
                                 }
-                                //Gcount[groupNum](n,l) = Gcount[groupNum](n,l) + 1;
                                 intGroupAssignML[l](n,i/10000) = groupNum;
                             }
                         }
@@ -443,302 +422,22 @@ int main(int argc, const char * argv[]) // generates a test network and runs the
                                         groupNum += std::pow(2,g-1);
                                     }
                                 }
-                                //Gcount[groupNum](n,l) = Gcount[groupNum](n,l) + 1;
                             }
                         }
                     }
                 }
             }
-            MathMatrix mostCommonGroup(numNodes,numLayers); //matrix which will contain the most common group assignment for each node-layer over the MCMC steps
-            //            for (size_t n = 0; n < numNodes; ++n)
-            //            {
-            //                for (size_t l = 0; l < numLayers; ++l)
-            //                {
-            //                    double maximumCount = 0.0;
-            //                    for (size_t g = 0; g < std::pow(2,numGroups-1); ++g)
-            //                    {
-            //                        if (Gcount[g](n,l) > maximumCount)
-            //                        {
-            //                            maximumCount = Gcount[g](n,l);
-            //                            mostCommonGroup(n,l) = g;
-            //                            groupAssignsFinal[l](n,run) = g;
-            //                        }
-            //                    }
-            //                }
-            //            }
-            //            for (size_t g = 0; g < std::pow(2,numGroups-1); ++g)
-            //            {
-            //                std::ofstream myfile2("group" + std::to_string(g) + "outMLrun" + std::to_string(run) + "new.txt", std::ios::trunc);
-            //                //myfile2 << Gcount[g];
-            //            }
+            MathMatrix mostCommonGroup(numNodes,numLayers); 
             for (size_t l = 0; l < numLayers; ++l)
             {
                 std::ofstream myfile3(dataset + "layer" + std::to_string(l) + "groupAssigns.txt", std::ios::trunc);
                 myfile3 << intGroupAssignML[l];
             }
         }
-        //        for (size_t l = 0; l < numLayers; ++l)
-        //        {
-        //            std::ofstream myfile4("layer" + std::to_string(l) + "groupAssignsFinalnew.txt", std::ios::trunc);
-        //            myfile4 << groupAssignsFinal[l];
-        //        }
     }
     return 0;
 }
-
-//long double logprobratio(MathMatrix A, std::vector<MathMatrix> G, int node, int group, int layer)
-///*
-// Computes a term necessary in the computation of P(A|G',k)/P(A|G,k) where G' contains the same group assignments as G with the exception of G{group}[node,layer]
-// A: adjacency matrix for given layer
-// G: group assignments (for all node-layers)
-// node: given node (of the node-layer whose group assignment will change)
-// group: given group (for which the group assignment changes)
-// layer: given layer (of the node-layer whose group assignment will change)
-// IMPORTANT: node starts indexing from 0
-// */
-//{
-//    size_t numGroups = G.size();
-//    size_t numNodes = G[0].getRowSize();
-//    MathVector oldt = MathVector(numGroups);
-//    MathVector newt = MathVector(numGroups);
-//    MathVector oldm = MathVector(numGroups);
-//    MathVector newm = MathVector(numGroups);
-//    for (size_t i = 0; i < numNodes; ++i)
-//    {
-//        for (size_t j = 0; j < i; ++j)
-//        {
-//            bool stoppingCond = false;
-//            size_t g = numGroups - 1;
-//            if ((i != node) && (j != node))
-//            {
-//                while (not(stoppingCond))
-//                {
-//                    if ((G[g](i,layer) > 0.9) && (G[g](j,layer) > 0.9))
-//                    {
-//                        oldt(g) = oldt(g) + 1.0;
-//                        newt(g) = newt(g) + 1.0;
-//                        if (A(i,j) > 0.9)
-//                        {
-//                            oldm(g) = oldm(g) + 1.0;
-//                            newm(g) = newm(g) + 1.0;
-//                        }
-//                        stoppingCond = true;
-//                    }
-//                    else
-//                    {
-//                        g--;
-//                    }
-//                }
-//            }
-//            else
-//            {
-//                bool stoppingCondOld = false;
-//                bool stoppingCondNew = false;
-//                size_t g = numGroups - 1;
-//                if (i == node)
-//                {
-//                    while (not(stoppingCondOld) || not(stoppingCondNew))
-//                    {
-//                        if (g != group)
-//                        {
-//                            if ((G[g](i,layer) > 0.9) && (G[g](j,layer) > 0.9))
-//                            {
-//                                if (not(stoppingCondOld))
-//                                {
-//                                    oldt(g) = oldt(g) + 1.0;
-//                                }
-//                                if (not(stoppingCondNew))
-//                                {
-//                                    newt(g) = newt(g) + 1.0;
-//                                }
-//                                if (A(i,j) > 0.9)
-//                                {
-//                                    if (not(stoppingCondOld))
-//                                    {
-//                                        oldm(g) = oldm(g) + 1.0;
-//                                    }
-//                                    if (not(stoppingCondNew))
-//                                    {
-//                                        newm(g) = newm(g) + 1.0;
-//                                    }
-//                                }
-//                                stoppingCondOld = true;
-//                                stoppingCondNew = true;
-//                            }
-//                            else
-//                            {
-//                                g--;
-//                            }
-//                        }
-//                        else
-//                        {
-//                            if ((G[g](i,layer) > 0.9) && (G[g](j,layer) > 0.9))
-//                            {
-//                                if (not(stoppingCondOld))
-//                                {
-//                                    oldt(g) = oldt(g) + 1.0;
-//                                }
-//                                if (A(i,j) > 0.9)
-//                                {
-//                                    if (not(stoppingCondOld))
-//                                    {
-//                                        oldm(g) = oldm(g) + 1.0;
-//                                    }
-//                                }
-//                                stoppingCondOld = true;
-//                            }
-//                            else if ((G[g](i,layer) < 0.1) && (G[g](j,layer) > 0.9))
-//                            {
-//                                if (not(stoppingCondNew))
-//                                {
-//                                    newt(g) = newt(g) + 1.0;
-//                                }
-//                                if (A(i,j) > 0.9)
-//                                {
-//                                    if (not(stoppingCondNew))
-//                                    {
-//                                        newm(g) = newm(g) + 1.0;
-//                                    }
-//                                }
-//                                stoppingCondNew = true;
-//                            }
-//                            g--;
-//                        }
-//                    }
-//                }
-//                if (j == node)
-//                {
-//                    while (not(stoppingCondOld) || not(stoppingCondNew))
-//                    {
-//                        if (g != group)
-//                        {
-//                            if ((G[g](i,layer) > 0.9) && (G[g](j,layer) > 0.9))
-//                            {
-//                                if (not(stoppingCondOld))
-//                                {
-//                                    oldt(g) = oldt(g) + 1.0;
-//                                }
-//                                if (not(stoppingCondNew))
-//                                {
-//                                    newt(g) = newt(g) + 1.0;
-//                                }
-//                                if (A(i,j) > 0.9)
-//                                {
-//                                    if (not(stoppingCondOld))
-//                                    {
-//                                        oldm(g) = oldm(g) + 1.0;
-//                                    }
-//                                    if (not(stoppingCondNew))
-//                                    {
-//                                        newm(g) = newm(g) + 1.0;
-//                                    }
-//                                }
-//                                stoppingCondOld = true;
-//                                stoppingCondNew = true;
-//                            }
-//                            else
-//                            {
-//                                g--;
-//                            }
-//                        }
-//                        else
-//                        {
-//                            if ((G[g](i,layer) > 0.9) && (G[g](j,layer) > 0.9))
-//                            {
-//                                if (not(stoppingCondOld))
-//                                {
-//                                    oldt(g) = oldt(g) + 1.0;
-//                                }
-//                                if (A(i,j) > 0.9)
-//                                {
-//                                    if (not(stoppingCondOld))
-//                                    {
-//                                        oldm(g) = oldm(g) + 1.0;
-//                                    }
-//                                }
-//                                stoppingCondOld = true;
-//                            }
-//                            else if ((G[g](j,layer) < 0.1) && (G[g](i,layer) > 0.9))
-//                            {
-//                                if (not(stoppingCondNew))
-//                                {
-//                                    newt(g) = newt(g) + 1.0;
-//                                }
-//                                if (A(i,j) > 0.9)
-//                                {
-//                                    if (not(stoppingCondNew))
-//                                    {
-//                                        newm(g) = newm(g) + 1.0;
-//                                    }
-//                                }
-//                                stoppingCondNew = true;
-//                            }
-//                            g--;
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
-//    long double out = 0.0;
-//    for (size_t g = 0; g < numGroups; ++g)
-//    {
-//        if (newm(g) >= oldm(g))
-//        {
-//            for (double i = oldm(g)+1; i < newm(g)+0.5; ++i)
-//            {
-//                out += std::log(i);
-//            }
-//        }
-//        else
-//        {
-//            for (double i = newm(g)+1; i < oldm(g)+0.5; ++i)
-//            {
-//                out -= std::log(i);
-//            }
-//        }
-//        if (newt(g) - newm(g) >= oldt(g) - oldm(g))
-//        {
-//            for (double i = oldt(g) - oldm(g)+1; i < newt(g) - newm(g)+0.5; ++i)
-//            {
-//                out += std::log(i);
-//            }
-//        }
-//        else
-//        {
-//            for (double i = newt(g) - newm(g)+1; i < oldt(g) - oldm(g)+0.5; ++i)
-//            {
-//                out -= std::log(i);
-//            }
-//        }
-//        if (newt(g) >= oldt(g))
-//        {
-//            for (double i = oldt(g)+2; i < newt(g)+1.5; ++i)
-//            {
-//                out -= std::log(i);
-//            }
-//        }
-//        else
-//        {
-//            for (double i = newt(g)+2; i < oldt(g)+1.5; ++i)
-//            {
-//                out += std::log(i);
-//            }
-//        }
-//    }
-//    return out;
-//}
-
 long double logprobratio(MathMatrix A, std::vector<MathMatrix> G, int node, int group, int layer)
-/*
- Computes a term necessary in the computation of P(A|G',k)/P(A|G,k) where G' contains the same group assignments as G with the exception of G{group}[node,layer]
- A: adjacency matrix for given layer
- G: group assignments (for all node-layers)
- node: given node (of the node-layer whose group assignment will change)
- group: given group (for which the group assignment changes)
- layer: given layer (of the node-layer whose group assignment will change)
- IMPORTANT: node starts indexing from 0
- */
 {
     size_t numGroups = G.size();
     size_t numNodes = G[0].getRowSize();
@@ -931,14 +630,11 @@ long double logprobratio(MathMatrix A, std::vector<MathMatrix> G, int node, int 
     }
     return out;
 }
-
 long double logbinom(double n, double k)
-//uses Stirling's approximation to compute an approximation to log(n choose k)
 {
     return logfactorial2(n) - logfactorial2(k) - logfactorial2(n-k);
 }
 double logfactorial(int n)
-//Approximation to log(n!) via Stirling's approximation
 {
     long double out = 0.0;
     if (n > 1)
@@ -948,13 +644,6 @@ double logfactorial(int n)
     return out;
 }
 long double logNewCorrection(MathVector prevGroups, MathVector nextGroups, int numGroups, std::vector<std::vector<double>> corrections)
-/*
- Computes log P(g_l|g_{l-1}) for the novel approach by using (3.21)
- prevGroups: vector containing the community assignments in layer l-1 (i.e., g_{l-1})
- nextGroups: vector containing the community assignments in layer l (i.e., g_{l})
- numGroups: given number of communities k
- corrections: the values of (5.7) for all 0 <= k_1 < k_2
- */
 {
     long double out = 0.0;
     size_t numNodes = prevGroups.size();
@@ -1004,17 +693,7 @@ bool stepNoGpSizeBiasNew(std::vector<MathMatrix> A, std::vector<MathMatrix> G, i
     double randomNum = dis(gen);
     return (randomNum < stepProb);
 }
-//
 long double lognewcorrectionNovel(MathMatrix G, int node, int layer, int numGroups, std::vector<std::vector<double>> corrections)
-/*
- Performs a step of the MCMC process using Bazzi et al approach
- A: vector of adjacency matrices
- G: group assignments
- node: given node (of the node-layer whose group assignment will change)
- group: given group (for which the group assignment changes)
- layer: given layer (of the node-layer whose group assignment will change)
- numMCsteps: the number of Monte Carlo steps to perform for the Monte Carlo integration
- */
 {
     size_t numNodes = G.getRowSize();
     size_t numLayers = G.getColSize();
@@ -1076,32 +755,9 @@ long double lognewcorrectionNovel(MathMatrix G, int node, int layer, int numGrou
     {
         logcorrection = (logcorrectionnumprev-logcorrectiondenomprev);
     }
-    //    if (layer == 0)
-    //    {
-    //        double oldGroup = G(node,layer);
-    //        double newGroup = -1.0*(G(node,layer)-1.0);
-    //        double sizeoldGroup = 0.0;
-    //        double sizenewGroup = 0.0;
-    //        for (size_t j = 0; j < numNodes; ++j)
-    //        {
-    //            if (fabs(G(j,layer) - oldGroup) < 0.1)
-    //            {
-    //                sizeoldGroup += 1.0;
-    //            }
-    //            if (fabs(G(j,layer) - newGroup) < 0.1)
-    //            {
-    //                sizenewGroup += 1.0;
-    //            }
-    //        }
-    //        logcorrection += std::log(sizenewGroup + 1) - std::log(sizeoldGroup);
-    //    }
     return logcorrection;
 }
-
 std::vector<std::complex<double>> coeffs(int n)
-/*
- Returns the values of (5.7) (here k_2 in (5.7) equals n)
- */
 {
     std::vector<std::complex<double>> out(n+1,{0,0});
     std::complex<double> last = {1,0};
@@ -1126,11 +782,7 @@ std::vector<std::complex<double>> coeffs(int n)
     out[n] = last;
     return out;
 }
-
 std::vector<std::vector<double>> corrections(int n)
-/*
- Returns the values of (5.7) for all 0 <= k_1 < k_2; in particular, the value of (5.7) for a given k_1, k_2 is out[k_2][k_1]
- */
 {
     std::vector<double> outTemp(n+1,0);
     std::vector<std::vector<double>> out(n+1,outTemp);
@@ -1153,17 +805,7 @@ std::vector<std::vector<double>> corrections(int n)
     }
     return out;
 }
-
 long double logprobrationew(std::vector<MathMatrix> A, std::vector<MathMatrix> G, std::vector<MathMatrix> Gtemp, std::vector<std::vector<double>> corrections)
-/*
- Computes a term necessary in the computation of P(A|G',k)/P(A|G,k) where G' contains the same group assignments as G with the exception of G{group}[node,layer]
- A: adjacency matrix for given layer
- G: group assignments (for all node-layers)
- node: given node (of the node-layer whose group assignment will change)
- group: given group (for which the group assignment changes)
- layer: given layer (of the node-layer whose group assignment will change)
- IMPORTANT: node starts indexing from 0
- */
 {
     long double out = 0.0;
     size_t numGroups = G.size();
@@ -1248,7 +890,6 @@ long double logprobrationew(std::vector<MathMatrix> A, std::vector<MathMatrix> G
                 }
             for (size_t i = 0; i < numNodes; ++i)
             {
-
                     currLayerOld(i) = G[g](i,layer);
                     currLayerNew(i) = Gtemp[g](i,layer);
             }
@@ -1259,9 +900,7 @@ long double logprobrationew(std::vector<MathMatrix> A, std::vector<MathMatrix> G
     }
     return out;
 }
-
 double logfactorial2(double n)
-//Approximation to log(n!) via Stirling's approximation
 {
     long double out = 0.0;
     if (n > 1)
